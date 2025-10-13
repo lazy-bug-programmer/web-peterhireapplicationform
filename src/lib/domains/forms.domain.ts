@@ -3,7 +3,7 @@ export interface Form {
   name: string;
   email: string;
   phone: string;
-  age: number;
+  age: string;
   nationality: string;
   gender: FormGender;
   requirement: boolean;

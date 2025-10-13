@@ -47,7 +47,7 @@ const formSchema = z.object({
   gender: z.enum(["male", "female"], {
     message: "Please select a gender.",
   }),
-  age: z.number().min(21, { message: "You must be at least 21 years old." }),
+  age: z.string(),
   nationality: z.string().min(2, { message: "Please enter your nationality." }),
   refCode: z.string().optional(),
   requirement: z.boolean().refine((val) => val === true, {
@@ -66,7 +66,7 @@ export function ApplicationForm() {
       email: "",
       phone: "",
       gender: undefined,
-      age: 21,
+      age: "21",
       nationality: "",
       refCode: "",
       requirement: false,
@@ -269,10 +269,10 @@ export function ApplicationForm() {
                     <FormLabel className="text-gray-700">Age</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
+                        type="textS"
                         placeholder="Enter your age"
                         {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onChange={(e) => field.onChange(e.target.value)}
                         className="border-gray-300 focus:border-purple-500 focus:ring-purple-500 transition-all duration-200"
                       />
                     </FormControl>
