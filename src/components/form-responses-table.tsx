@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -531,17 +531,17 @@ export function FormResponsesTable({
         </div>
       </div>
 
-      {/* Details Dialog */}
-      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Application Details</DialogTitle>
-            <DialogDescription>
+      {/* Details Drawer */}
+      <Sheet open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+          <SheetHeader>
+            <SheetTitle>Application Details</SheetTitle>
+            <SheetDescription>
               Detailed information about this application submission.
-            </DialogDescription>
-          </DialogHeader>
+            </SheetDescription>
+          </SheetHeader>
           {selectedForm && (
-            <div className="space-y-4">
+            <div className="space-y-4 mt-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold text-sm text-gray-500">
@@ -652,7 +652,7 @@ export function FormResponsesTable({
               </div>
             </div>
           )}
-          <DialogFooter className="sm:justify-start">
+          <SheetFooter className="mt-6">
             <div className="flex space-x-2">
               <Button
                 variant="secondary"
@@ -684,9 +684,9 @@ export function FormResponsesTable({
                 Reject
               </Button>
             </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
