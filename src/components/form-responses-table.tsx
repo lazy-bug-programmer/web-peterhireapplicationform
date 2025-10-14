@@ -541,144 +541,125 @@ export function FormResponsesTable({
             </SheetDescription>
           </SheetHeader>
           {selectedForm && (
-            <div className="space-y-4 mt-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold text-sm text-gray-500">
-                    Status
-                  </h3>
-                  <div className="mt-1">
-                    {getStatusBadge(selectedForm.status)}
-                  </div>
+            <div className="mt-6">
+              {/* Timestamp above container */}
+              <div className="mb-4 text-sm text-gray-500">
+                Submitted: {formatDate(selectedForm.submitted_at)}
+              </div>
+
+              <div className="bg-gray-50 p-6 rounded-lg space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    Form Name
+                  </span>
+                  <span className="text-sm text-gray-900">
+                    AnywhereHire Custom Forms
+                  </span>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-sm text-gray-500">
-                    Submitted
-                  </h3>
-                  <div className="mt-1">
-                    {formatDate(selectedForm.submitted_at)}
-                  </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    Name
+                  </span>
+                  <span className="text-sm text-gray-900">
+                    {selectedForm.name}
+                  </span>
                 </div>
-              </div>
 
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">
-                  Applicant
-                </h3>
-                <div className="mt-1 font-semibold">{selectedForm.name}</div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">
-                  Email Address
-                </h3>
-                <div className="mt-1">{selectedForm.email}</div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">
-                  Phone Number
-                </h3>
-                <div className="mt-1">{selectedForm.phone}</div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">Age</h3>
-                <div className="mt-1">{selectedForm.age}</div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">
-                  Nationality
-                </h3>
-                <div className="mt-1">{selectedForm.nationality ?? "None"}</div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">Gender</h3>
-                <div className="mt-1">
-                  {getGenderString(selectedForm.gender)}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">Age</span>
+                  <span className="text-sm text-gray-900">
+                    {selectedForm.age}
+                  </span>
                 </div>
-              </div>
 
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">
-                  Has Local Bank Account
-                </h3>
-                <div className="mt-1">
-                  {selectedForm.requirement ? (
-                    <Badge
-                      variant="outline"
-                      className="bg-green-100 text-green-800 border-green-200"
-                    >
-                      Yes
-                    </Badge>
-                  ) : (
-                    <Badge
-                      variant="outline"
-                      className="bg-red-100 text-red-800 border-red-200"
-                    >
-                      No
-                    </Badge>
-                  )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    Email
+                  </span>
+                  <span className="text-sm text-gray-900 break-all">
+                    {selectedForm.email}
+                  </span>
                 </div>
-              </div>
 
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">
-                  Reference Code
-                </h3>
-                <div className="mt-1 font-mono">{selectedForm.ref_code_id}</div>
-              </div>
-
-              {refCodeData && (
-                <div>
-                  <h3 className="font-semibold text-sm text-gray-500">
-                    Reference Code ID
-                  </h3>
-                  <div className="mt-1 text-xs font-mono truncate">
-                    {refCodeData.$id}
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    Phone Number
+                  </span>
+                  <span className="text-sm text-gray-900">
+                    {selectedForm.phone}
+                  </span>
                 </div>
-              )}
 
-              <div>
-                <h3 className="font-semibold text-sm text-gray-500">
-                  Application ID
-                </h3>
-                <div className="mt-1 text-xs font-mono truncate">
-                  {selectedForm.$id}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    Nationality
+                  </span>
+                  <span className="text-sm text-gray-900">
+                    {selectedForm.nationality ?? "Not specified"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    Gender
+                  </span>
+                  <span className="text-sm text-gray-900">
+                    {getGenderString(selectedForm.gender)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    Referrer Code
+                  </span>
+                  <span className="text-sm text-gray-900 font-mono">
+                    {selectedForm.ref_code_id}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-gray-600">
+                    Requirement
+                  </span>
+                  <span className="text-sm text-gray-900 text-right max-w-xs">
+                    {selectedForm.requirement
+                      ? "Yes, I have a local bank account to receive wages"
+                      : "No, I don't have a local bank account"}
+                  </span>
                 </div>
               </div>
             </div>
           )}
-          <SheetFooter className="mt-6">
-            <div className="flex space-x-2">
+          <SheetFooter className="mt-6 pt-6 border-t">
+            <div className="flex space-x-2 w-full">
               <Button
                 variant="secondary"
                 onClick={() => setShowDetailsDialog(false)}
+                className="flex-1"
               >
                 Close
               </Button>
               <Button
-                variant="outline"
+                variant="default"
                 onClick={() => {
                   setShowDetailsDialog(false);
                   handleStatusChange(selectedForm!.$id!, FormStatus.APPROVED);
                 }}
                 disabled={selectedForm?.status === FormStatus.APPROVED}
+                className="flex-1 bg-green-600 hover:bg-green-700"
               >
                 <Check className="mr-2 h-4 w-4" />
                 Approve
               </Button>
               <Button
-                variant="outline"
+                variant="destructive"
                 onClick={() => {
                   setShowDetailsDialog(false);
                   handleStatusChange(selectedForm!.$id!, FormStatus.REJECTED);
                 }}
                 disabled={selectedForm?.status === FormStatus.REJECTED}
-                className="text-red-600"
+                className="flex-1"
               >
                 <X className="mr-2 h-4 w-4" />
                 Reject
