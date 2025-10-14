@@ -536,15 +536,6 @@ export function FormResponsesTable({
               <div className="bg-gray-50 p-6 rounded-lg space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-600">
-                    Form Name
-                  </span>
-                  <span className="text-sm text-gray-900">
-                    AnywhereHire Custom Forms
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">
                     Name
                   </span>
                   <span className="text-sm text-gray-900">
