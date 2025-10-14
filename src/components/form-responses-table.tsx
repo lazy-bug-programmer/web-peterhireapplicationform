@@ -56,10 +56,7 @@ import {
   markFormAsViewed,
   markFormAsUnread,
 } from "@/lib/actions/forms.action";
-import {
-  findReferralCodeByCode,
-  getReferralCodeValuesByCreator,
-} from "@/lib/actions/referral_codes.action";
+import { getReferralCodeValuesByCreator } from "@/lib/actions/referral_codes.action";
 import { useAuth } from "@/lib/auth-context";
 import { UserRole, UserProfile } from "@/lib/domains/user_profile.domain";
 import { getAllUserProfiles } from "@/lib/actions/user_profile.action";
@@ -84,7 +81,6 @@ export function FormResponsesTable({
   const [selectedForm, setSelectedForm] = useState<Form | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [refCodeData, setRefCodeData] = useState<ReferralCode | null>(null);
   const [refCodeCreators, setRefCodeCreators] = useState<{
     [refCodeValue: string]: string;
   }>({});
@@ -261,16 +257,6 @@ export function FormResponsesTable({
               form.$id === formId ? { ...form, has_view: true } : form
             )
           );
-        }
-
-        // Get referral code information
-        if (formData.ref_code_id) {
-          const refCodeResponse = await findReferralCodeByCode(
-            formData.ref_code_id
-          );
-          if (refCodeResponse.success) {
-            setRefCodeData(refCodeResponse.data! as unknown as ReferralCode);
-          }
         }
 
         setShowDetailsDialog(true);
