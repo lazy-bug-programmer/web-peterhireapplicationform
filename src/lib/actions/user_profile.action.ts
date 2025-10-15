@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "../firebase/server";
+import admin from "../firebase/server";
 import { UserProfile, UserRole } from "../domains/user_profile.domain";
 
 // Collection information
@@ -345,6 +346,26 @@ export async function getDefaultAdminProfile() {
     return {
       success: false,
       error: "Failed to fetch default admin profile",
+    };
+  }
+}
+
+// Update user password using Firebase Admin
+export async function updateUserPassword(userId: string, newPassword: string) {
+  try {
+    await admin.auth().updateUser(userId, {
+      password: newPassword,
+    });
+
+    return {
+      success: true,
+      message: "Password updated successfully",
+    };
+  } catch (error) {
+    console.error("Error updating user password:", error);
+    return {
+      success: false,
+      error: "Failed to update password",
     };
   }
 }

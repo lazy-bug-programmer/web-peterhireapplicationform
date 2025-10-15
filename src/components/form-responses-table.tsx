@@ -87,7 +87,7 @@ export function FormResponsesTable({
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [formsPerPage] = useState(10);
+  const [formsPerPage] = useState(3);
   const [totalForms, setTotalForms] = useState(0);
   const [allForms, setAllForms] = useState<Form[]>([]);
 

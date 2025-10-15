@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Crown, UserPlus, Users, Settings, Trash2, Edit } from "lucide-react";
+import {
+  Crown,
+  UserPlus,
+  Users,
+  Settings,
+  Trash2,
+  Edit,
+  Key,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,6 +53,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -64,11 +78,12 @@ import {
   updateUserProfile,
   updateUserStatus,
   deleteUserProfile,
+  updateUserPassword,
 } from "@/lib/actions/user_profile.action";
 import { UserProfile, UserRole } from "@/lib/domains/user_profile.domain";
 import { signUpWithEmailAndPassword } from "@/lib/firebase/client";
 
-// Form validation schema
+// Form validation schemas
 const createUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -76,13 +91,35 @@ const createUserSchema = z.object({
   role: z.nativeEnum(UserRole, { required_error: "Please select a role" }),
 });
 
+const editUserSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  role: z.nativeEnum(UserRole, { required_error: "Please select a role" }),
+});
+
+const changePasswordSchema = z
+  .object({
+    newPassword: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
 type CreateUserForm = z.infer<typeof createUserSchema>;
+type EditUserForm = z.infer<typeof editUserSchema>;
+type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
 export default function AdminsManagementPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [changingPasswordUser, setChangingPasswordUser] =
+    useState<UserProfile | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserProfile | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -96,8 +133,16 @@ export default function AdminsManagementPage() {
     },
   });
 
-  const editForm = useForm<CreateUserForm>({
-    resolver: zodResolver(createUserSchema),
+  const editForm = useForm<EditUserForm>({
+    resolver: zodResolver(editUserSchema),
+  });
+
+  const passwordForm = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      newPassword: "",
+      confirmPassword: "",
+    },
   });
 
   // Load users on component mount
@@ -157,7 +202,7 @@ export default function AdminsManagementPage() {
     }
   };
 
-  const onUpdateUser = async (data: CreateUserForm) => {
+  const onUpdateUser = async (data: EditUserForm) => {
     if (!editingUser) return;
 
     setIsSubmitting(true);
@@ -179,6 +224,31 @@ export default function AdminsManagementPage() {
     } catch (error) {
       toast.error("Error updating user");
       console.error("Error updating user:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const onChangePassword = async (data: ChangePasswordForm) => {
+    if (!changingPasswordUser) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await updateUserPassword(
+        changingPasswordUser.userId,
+        data.newPassword
+      );
+
+      if (response.success) {
+        toast.success("Password updated successfully");
+        setChangingPasswordUser(null);
+        passwordForm.reset();
+      } else {
+        toast.error(response.error || "Failed to update password");
+      }
+    } catch (error) {
+      toast.error("Error updating password");
+      console.error("Error updating password:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -225,6 +295,14 @@ export default function AdminsManagementPage() {
       name: user.name || "",
       email: user.email,
       role: user.role,
+    });
+  };
+
+  const openPasswordDialog = (user: UserProfile) => {
+    setChangingPasswordUser(user);
+    passwordForm.reset({
+      newPassword: "",
+      confirmPassword: "",
     });
   };
 
@@ -484,33 +562,67 @@ export default function AdminsManagementPage() {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditDialog(user)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleUserStatus(user)}
-                          className={
-                            user.isActive ? "text-red-600" : "text-green-600"
-                          }
-                        >
-                          {user.isActive ? "Deactivate" : "Activate"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setDeletingUser(user)}
-                          className="text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
+                      <TooltipProvider>
+                        <div className="flex items-center justify-end gap-2">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditDialog(user)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Edit user details</p>
+                            </TooltipContent>
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openPasswordDialog(user)}
+                                className="text-blue-600 hover:bg-blue-50"
+                              >
+                                <Key className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Change password</p>
+                            </TooltipContent>
+                          </Tooltip>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleUserStatus(user)}
+                            className={
+                              user.isActive ? "text-red-600" : "text-green-600"
+                            }
+                          >
+                            {user.isActive ? "Deactivate" : "Activate"}
+                          </Button>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setDeletingUser(user)}
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Delete user</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 ))
@@ -614,6 +726,82 @@ export default function AdminsManagementPage() {
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Updating..." : "Update User"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Dialog */}
+      <Dialog
+        open={!!changingPasswordUser}
+        onOpenChange={() => setChangingPasswordUser(null)}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <Form {...passwordForm}>
+            <form
+              onSubmit={passwordForm.handleSubmit(onChangePassword)}
+              className="space-y-4"
+            >
+              <DialogHeader>
+                <DialogTitle>Change Password</DialogTitle>
+                <DialogDescription>
+                  Set a new password for &quot;
+                  {changingPasswordUser?.name || changingPasswordUser?.email}
+                  &quot;. The user will be able to log in with their new
+                  password immediately.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <FormField
+                  control={passwordForm.control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter new password"
+                          type="password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={passwordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Confirm new password"
+                          type="password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setChangingPasswordUser(null)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Updating..." : "Update Password"}
                 </Button>
               </DialogFooter>
             </form>
