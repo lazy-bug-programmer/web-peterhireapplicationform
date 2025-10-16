@@ -49,14 +49,12 @@ import {
 } from "lucide-react";
 import {
   getForms,
-  getFormsByRefCodes,
   updateFormStatus,
   deleteForm,
   getForm,
   markFormAsViewed,
   markFormAsUnread,
 } from "@/lib/actions/forms.action";
-import { getReferralCodeValuesByCreator } from "@/lib/actions/referral_codes.action";
 import { useAuth } from "@/lib/auth-context";
 import { UserRole, UserProfile } from "@/lib/domains/user_profile.domain";
 import { getAllUserProfiles } from "@/lib/actions/user_profile.action";
@@ -109,17 +107,10 @@ export function FormResponsesTable({
       } else if (userProfile?.role === UserRole.SUPER_ADMIN) {
         response = await getForms();
       } else if (userProfile?.role === UserRole.ADMIN && userProfile.$id) {
-        // Get the reference codes created by this admin
-        const refCodes = await getReferralCodeValuesByCreator(userProfile.$id);
-        if (refCodes.length > 0) {
-          response = await getFormsByRefCodes(refCodes);
-        } else {
-          // No ref codes found, so no forms to show
-          setAllForms([]);
-          setTotalForms(0);
-          setLoading(false);
-          return;
-        }
+        // Previously we filtered admin views by the referral codes they created.
+        // Requirement: show all form responses to admins as well. Use getForms()
+        // so admins see all submissions.
+        response = await getForms();
       } else {
         // If no valid profile, return empty array
         setAllForms([]);
